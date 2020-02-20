@@ -15,9 +15,7 @@ def buildAgentName(String jobName, String buildNumber) {
         jobName = jobName.substring(0, 55);
     }
 
-    agentName = "a.${jobName}${buildNumber}".replace('_', '-').replace('/', '-').replace('-.', '.');
-
-    return agentName;
+    return "a.${jobName}${buildNumber}".replace('_', '-').replace('/', '-').replace('-.', '.');
 }
 
 def buildLabel = buildAgentName(env.JOB_NAME, env.BUILD_NUMBER);
@@ -69,7 +67,7 @@ spec:
             optional: true
       env:
         - name: CHART_NAME
-          value: template-node-typescript
+          value: base
         - name: CHART_ROOT
           value: chart
         - name: TMP_DIR
@@ -112,7 +110,7 @@ spec:
             stage('Build') {
                 sh '''#!/bin/bash
                     npm install
-                    npm run build
+                    npm run build --if-present
                 '''
             }
             stage('Test') {
@@ -122,12 +120,12 @@ spec:
             }
             stage('Publish pacts') {
                 sh '''#!/bin/bash
-                    npm run pact:publish
+                    npm run pact:publish --if-present
                 '''
             }
             stage('Verify pact') {
                 sh '''#!/bin/bash
-                    npm run pact:verify
+                    npm run pact:verify --if-present
                 '''
             }
             stage('Sonar scan') {
@@ -138,7 +136,7 @@ spec:
                   exit 0
                 fi
 
-                npm run sonarqube:scan
+                npm run sonarqube:scan --if-present
                 '''
             }
         }
